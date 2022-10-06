@@ -1,0 +1,47 @@
+package com.tn.query.jpa;
+
+import static java.util.Collections.emptyList;
+import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Collectors.toUnmodifiableSet;
+
+import java.lang.reflect.Field;
+import java.util.Collection;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Stream;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.Root;
+
+public class NameMappings
+{
+  private static final String JACOCO_FIELD = "$jacocoData";
+
+  private NameMappings()
+  {
+  }
+
+  public static <T> Map<String, Expression<?>> forFields(Class<T> subject, CriteriaQuery<T> criteriaQuery)
+  {
+    return forFields(subject, criteriaQuery, emptyList());
+  }
+
+  public static <T> Map<String, Expression<?>> forFields(Class<T> subject, CriteriaQuery<T> criteriaQuery, Collection<String> ignored)
+  {
+    return fieldNames(subject, ignored).stream().collect(toMap(identity(), expression(criteriaQuery.from(subject))));
+  }
+
+  private static <T> Function<String, Expression<?>> expression(Root<T> root)
+  {
+    return root::get;
+  }
+
+  private static Collection<String> fieldNames(Class<?> subject, Collection<String> ignored)
+  {
+    return Stream.of(subject.getDeclaredFields())
+      .map(Field::getName)
+      .filter(fieldName -> !JACOCO_FIELD.equals(fieldName) && !ignored.contains(fieldName))
+      .collect(toUnmodifiableSet());
+  }
+}

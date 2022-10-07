@@ -5,8 +5,7 @@ used with JPA repositories.
 
 ## Usage
 
-Each JPA repository should extend `com.tn.query.jpa.AbstractQueryableRepository`; an instance of `com.tn.query.jpa.JpaQueryParser` should be passed to the JPA repository when it is 
-created.
+Each JPA repository should extend `com.tn.query.jpa.QueryableRepository`.
 
 For example, when using Spring Boot's JPA extension, given a class:
 ```java
@@ -22,7 +21,28 @@ public class Person
   ...
 }
 ```
-A JPA repository could be created as follows:
+
+A JPA repository interface could be defined as follows:
+```java
+public interface PersonRepository extends CrudRepository<Person, Integer>, QueryableRepository<Person>
+{  
+}
+```
+
+Spring Boot treats a class in the same package as the JPA repository interface with an `Impl` suffix as the base class for the dynamically created runtime instance.  In order to 
+provide and implementation of `com.tn.query.jpa.QueryableRepository`, a JPA repository class that extends `com.tn.query.jpa.AbstractQueryableRepository` could be defined as 
+follows:
+```java
+public class PersonRepositoryImpl extends AbstractQueryableRepository<Person>
+{
+  public TargetRepositoryImpl(EntityManager entityManager, CriteriaQuery<Person> criteriaQuery, QueryParser<Person> queryParser)
+  {
+    super(entityManager, criteriaQuery, queryParser);
+  }
+}
+```
+
+An instance of `PersonRepositoryImpl` could then be created as follows:
 ```java
 @Bean
 PersonRepositoryImpl personRepositoryImpl(EntityManager entityManager)
@@ -42,7 +62,7 @@ PersonRepositoryImpl personRepositoryImpl(EntityManager entityManager)
 }
 ```
 
-And would be used:
+Spring will do all the necessary wiring; the resulting `personRepository` could be used as follows:
 ```java
 List<Person> people = personRepository.findWhere("((firstName = John && sex = MALE) || (firstName = Jane && sex = FEMALE)) && lastName = Smith");
 ```

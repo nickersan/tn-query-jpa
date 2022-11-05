@@ -13,6 +13,8 @@ import com.tn.query.QueryParseException;
 
 public class JpaQueryParser extends AbstractQueryParser<Predicate>
 {
+  private static final String LIKE_WILDCARD = "%";
+
   private final CriteriaBuilder criteriaBuilder;
   private final Map<String, Expression<?>> nameMappings;
 
@@ -66,6 +68,18 @@ public class JpaQueryParser extends AbstractQueryParser<Predicate>
   }
 
   @Override
+  protected Predicate like(String left, Object right)
+  {
+    return this.criteriaBuilder.like(nameMapping(left), replaceWildcard(right));
+  }
+
+  @Override
+  protected Predicate notLike(String left, Object right)
+  {
+    return this.criteriaBuilder.notLike(nameMapping(left), replaceWildcard(right));
+  }
+
+  @Override
   protected Predicate in(String left, List<?> right)
   {
     CriteriaBuilder.In<Object> in = this.criteriaBuilder.in(nameMapping(left));
@@ -108,5 +122,12 @@ public class JpaQueryParser extends AbstractQueryParser<Predicate>
     if (!(obj instanceof Comparable)) throw new QueryParseException("Cannot compare: " + obj);
 
     return (Comparable)obj;
+  }
+
+  private String replaceWildcard(Object value)
+  {
+    checkLikeable(value);
+
+    return value.toString().replace(WILDCARD, LIKE_WILDCARD);
   }
 }

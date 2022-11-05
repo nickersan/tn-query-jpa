@@ -75,6 +75,10 @@ class JpaQueryParserIntegrationTest
     assertFindWhere("booleanValue <= false", emptyList());
     assertFindWhere("booleanValue <= X", emptyList());
 
+    assertThrows(QueryException.class, () -> this.targetRepository.findWhere("booleanValue ≈ true"));
+
+    assertThrows(QueryException.class, () -> this.targetRepository.findWhere("booleanValue !≈ false"));
+
     assertFindWhere("booleanValue ∈ [true, false]", List.of(target));
     assertFindWhere("booleanValue ∈ [true]", List.of(target));
     assertFindWhere("booleanValue ∈ [false]", emptyList());
@@ -115,6 +119,10 @@ class JpaQueryParserIntegrationTest
     assertFindWhere("byteValue <= 0");
     assertThrows(QueryException.class, () -> this.targetRepository.findWhere("byteValue <= X"));
 
+    assertThrows(QueryException.class, () -> this.targetRepository.findWhere("byteValue ≈ 2"));
+
+    assertThrows(QueryException.class, () -> this.targetRepository.findWhere("byteValue !≈ 1"));
+
     assertFindWhere("byteValue ∈ [1, 2]", target);
     assertFindWhere("byteValue ∈ [1]", target);
     assertFindWhere("byteValue ∈ [2]");
@@ -154,6 +162,10 @@ class JpaQueryParserIntegrationTest
     assertFindWhere("charValue <= b", target);
     assertFindWhere("charValue <= a");
     assertThrows(QueryException.class, () -> this.targetRepository.findWhere("charValue <= bc"));
+
+    assertThrows(QueryException.class, () -> this.targetRepository.findWhere("charValue ≈ b"));
+
+    assertThrows(QueryException.class, () -> this.targetRepository.findWhere("charValue !≈ c"));
 
     assertFindWhere("charValue ∈ [a, b, c]", target);
     assertFindWhere("charValue ∈ [b]", target);
@@ -199,6 +211,10 @@ class JpaQueryParserIntegrationTest
     assertFindWhere("dateValue <= 2021-02-04");
     assertThrows(QueryException.class, () -> this.targetRepository.findWhere("dateValue <= X"));
 
+    assertThrows(QueryException.class, () -> this.targetRepository.findWhere("dateValue ≈ 2021-02-06"));
+
+    assertThrows(QueryException.class, () -> this.targetRepository.findWhere("dateValue !≈ 2021-02-05"));
+
     assertFindWhere("dateValue ∈ [2021-02-04, 2021-02-05, 2021-02-06]", target);
     assertFindWhere("dateValue ∈ [2021-02-05]", target);
     assertFindWhere("dateValue ∈ [2021-02-04]");
@@ -243,6 +259,10 @@ class JpaQueryParserIntegrationTest
     assertFindWhere("dateValue <= 2021-02-05T10:14");
     assertThrows(QueryException.class, () -> this.targetRepository.findWhere("dateValue <= X"));
 
+    assertThrows(QueryException.class, () -> this.targetRepository.findWhere("dateValue ≈ 2021-02-06T10:16"));
+
+    assertThrows(QueryException.class, () -> this.targetRepository.findWhere("dateValue !≈ 2021-02-05T10:15"));
+
     assertFindWhere("dateValue ∈ [2021-02-05T10:14, 2021-02-05T10:15, 2021-02-05T10:16]", target);
     assertFindWhere("dateValue ∈ [2021-02-05T10:15]", target);
     assertFindWhere("dateValue ∈ [2021-02-05T10:14]");
@@ -282,10 +302,14 @@ class JpaQueryParserIntegrationTest
     assertFindWhere("dateValue < 2021-02-05T10:15:16");
     assertThrows(QueryException.class, () -> this.targetRepository.findWhere("dateValue < X"));
 
-    assertFindWhere("dateValue <= 2021-02-05T10:17", target);
-    assertFindWhere("dateValue <= 2021-02-05T10:16", target);
-    assertFindWhere("dateValue <= 2021-02-05T10:15");
+    assertFindWhere("dateValue <= 2021-02-05T10:15:17", target);
+    assertFindWhere("dateValue <= 2021-02-05T10:15:16", target);
+    assertFindWhere("dateValue <= 2021-02-05T10:15:15");
     assertThrows(QueryException.class, () -> this.targetRepository.findWhere("dateValue <= X"));
+
+    assertThrows(QueryException.class, () -> this.targetRepository.findWhere("dateValue ≈ 2021-02-06T10:15:16"));
+
+    assertThrows(QueryException.class, () -> this.targetRepository.findWhere("dateValue !≈ 2021-02-05T10:15:15"));
 
     assertFindWhere("dateValue ∈ [2021-02-05T10:15:15, 2021-02-05T10:15:16, 2021-02-05T10:15:17]", target);
     assertFindWhere("dateValue ∈ [2021-02-05T10:15:16]", target);
@@ -331,6 +355,10 @@ class JpaQueryParserIntegrationTest
     assertFindWhere("dateValue <= 2021-02-05T10:15:16.16");
     assertThrows(QueryException.class, () -> this.targetRepository.findWhere("dateValue <= X"));
 
+    assertThrows(QueryException.class, () -> this.targetRepository.findWhere("dateValue ≈ 2021-02-06T10:15:16.17"));
+
+    assertThrows(QueryException.class, () -> this.targetRepository.findWhere("dateValue !≈ 2021-02-05T10:16:16.18"));
+
     assertFindWhere("dateValue ∈ [2021-02-05T10:15:16.16, 2021-02-05T10:15:16.17, 2021-02-05T10:15:16.18]", target);
     assertFindWhere("dateValue ∈ [2021-02-05T10:15:16.17]", target);
     assertFindWhere("dateValue ∈ [2021-02-05T10:15:16.16]");
@@ -371,6 +399,10 @@ class JpaQueryParserIntegrationTest
     assertFindWhere("doubleValue <= 1.1");
     assertThrows(QueryException.class, () -> this.targetRepository.findWhere("doubleValue <= X"));
 
+    assertThrows(QueryException.class, () -> this.targetRepository.findWhere("doubleValue ≈ 1.3"));
+
+    assertThrows(QueryException.class, () -> this.targetRepository.findWhere("doubleValue !≈ 1.2"));
+
     assertFindWhere("doubleValue ∈ [1.1, 1.2, 1.3]", target);
     assertFindWhere("doubleValue ∈ [1.2]", target);
     assertFindWhere("doubleValue ∈ [1.1]");
@@ -410,6 +442,10 @@ class JpaQueryParserIntegrationTest
     assertFindWhere("intValue <= 10", target);
     assertFindWhere("intValue <= 9");
     assertThrows(QueryException.class, () -> this.targetRepository.findWhere("intValue <= X"));
+
+    assertThrows(QueryException.class, () -> this.targetRepository.findWhere("intValue ≈ 11"));
+
+    assertThrows(QueryException.class, () -> this.targetRepository.findWhere("intValue !≈ 12"));
 
     assertFindWhere("intValue ∈ [9, 10, 11]", target);
     assertFindWhere("intValue ∈ [10]", target);
@@ -453,6 +489,10 @@ class JpaQueryParserIntegrationTest
     assertFindWhere("localDateValue <= 2021-02-04");
     assertThrows(QueryException.class, () -> this.targetRepository.findWhere("localDateValue <= X"));
 
+    assertThrows(QueryException.class, () -> this.targetRepository.findWhere("localDateValue ≈ 2021-02-06"));
+
+    assertThrows(QueryException.class, () -> this.targetRepository.findWhere("localDateValue !≈ 2021-02-05"));
+
     assertFindWhere("localDateValue ∈ [2021-02-04, 2021-02-05, 2021-02-06]", target);
     assertFindWhere("localDateValue ∈ [2021-02-05]", target);
     assertFindWhere("localDateValue ∈ [2021-02-04]");
@@ -495,6 +535,10 @@ class JpaQueryParserIntegrationTest
     assertFindWhere("localDateTimeValue <= 2021-02-05T10:14");
     assertThrows(QueryException.class, () -> this.targetRepository.findWhere("localDateTimeValue <= X"));
 
+    assertThrows(QueryException.class, () -> this.targetRepository.findWhere("localDateTimeValue ≈ 2021-02-05T10:16"));
+
+    assertThrows(QueryException.class, () -> this.targetRepository.findWhere("localDateTimeValue !≈ 2021-02-05T10:15"));
+
     assertFindWhere("localDateTimeValue ∈ [2021-02-05T10:14, 2021-02-05T10:15, 2021-02-05T10:16]", target);
     assertFindWhere("localDateTimeValue ∈ [2021-02-05T10:15]", target);
     assertFindWhere("localDateTimeValue ∈ [2021-02-05T10:14]");
@@ -532,10 +576,14 @@ class JpaQueryParserIntegrationTest
     assertFindWhere("localDateTimeValue < 2021-02-05T10:15:16");
     assertThrows(QueryException.class, () -> this.targetRepository.findWhere("localDateTimeValue < X"));
 
-    assertFindWhere("localDateTimeValue <= 2021-02-05T10:17", target);
-    assertFindWhere("localDateTimeValue <= 2021-02-05T10:16", target);
-    assertFindWhere("localDateTimeValue <= 2021-02-05T10:15");
+    assertFindWhere("localDateTimeValue <= 2021-02-05T10:15:17", target);
+    assertFindWhere("localDateTimeValue <= 2021-02-05T10:15:16", target);
+    assertFindWhere("localDateTimeValue <= 2021-02-05T10:15:15");
     assertThrows(QueryException.class, () -> this.targetRepository.findWhere("localDateTimeValue <= X"));
+
+    assertThrows(QueryException.class, () -> this.targetRepository.findWhere("localDateTimeValue ≈ 2021-02-05T10:15:16"));
+
+    assertThrows(QueryException.class, () -> this.targetRepository.findWhere("localDateTimeValue !≈ 2021-02-05T10:15:15"));
 
     assertFindWhere("localDateTimeValue ∈ [2021-02-05T10:15:15, 2021-02-05T10:15:16, 2021-02-05T10:15:17]", target);
     assertFindWhere("localDateTimeValue ∈ [2021-02-05T10:15:16]", target);
@@ -579,6 +627,10 @@ class JpaQueryParserIntegrationTest
     assertFindWhere("localDateTimeValue <= 2021-02-05T10:15:16.16");
     assertThrows(QueryException.class, () -> this.targetRepository.findWhere("localDateTimeValue <= X"));
 
+    assertThrows(QueryException.class, () -> this.targetRepository.findWhere("localDateTimeValue ≈ 2021-02-05T10:15:16.18"));
+
+    assertThrows(QueryException.class, () -> this.targetRepository.findWhere("localDateTimeValue !≈ 2021-02-05T10:15:16.17"));
+
     assertFindWhere("localDateTimeValue ∈ [2021-02-05T10:15:16.16, 2021-02-05T10:15:16.17, 2021-02-05T10:15:16.18]", target);
     assertFindWhere("localDateTimeValue ∈ [2021-02-05T10:15:16.17]", target);
     assertFindWhere("localDateTimeValue ∈ [2021-02-05T10:15:16.16]");
@@ -618,6 +670,10 @@ class JpaQueryParserIntegrationTest
     assertFindWhere("longValue <= 10", target);
     assertFindWhere("longValue <= 9");
     assertThrows(QueryException.class, () -> this.targetRepository.findWhere("longValue <= X"));
+
+    assertThrows(QueryException.class, () -> this.targetRepository.findWhere("longValue ≈ 11"));
+
+    assertThrows(QueryException.class, () -> this.targetRepository.findWhere("longValue !≈ 10"));
 
     assertFindWhere("longValue ∈ [9, 10, 11]", target);
     assertFindWhere("longValue ∈ [10]", target);
@@ -659,6 +715,10 @@ class JpaQueryParserIntegrationTest
     assertFindWhere("shortValue <= 9");
     assertThrows(QueryException.class, () -> this.targetRepository.findWhere("shortValue <= X"));
 
+    assertThrows(QueryException.class, () -> this.targetRepository.findWhere("shortValue ≈ 11"));
+
+    assertThrows(QueryException.class, () -> this.targetRepository.findWhere("shortValue !≈ 10"));
+
     assertFindWhere("shortValue ∈ [9, 10, 11]", target);
     assertFindWhere("shortValue ∈ [10]", target);
     assertFindWhere("shortValue ∈ [9]");
@@ -692,6 +752,20 @@ class JpaQueryParserIntegrationTest
     assertFindWhere("stringValue <= BC", target);
     assertFindWhere("stringValue <= BB", target);
     assertFindWhere("stringValue <= AB");
+
+    assertFindWhere("stringValue ≈ B*", target);
+    assertFindWhere("stringValue ≈ *B", target);
+    assertFindWhere("stringValue ≈ *B*", target);
+    assertFindWhere("stringValue ≈ *A*");
+    assertFindWhere("stringValue ≈ *A*");
+    assertFindWhere("stringValue ≈ *A*");
+
+    assertFindWhere("stringValue !≈ B*");
+    assertFindWhere("stringValue !≈ *B");
+    assertFindWhere("stringValue !≈ *B*");
+    assertFindWhere("stringValue !≈ *A*", target);
+    assertFindWhere("stringValue !≈ *A*", target);
+    assertFindWhere("stringValue !≈ *A*", target);
 
     assertFindWhere("stringValue ∈ [AB, BB, BC]", target);
     assertFindWhere("stringValue ∈ [BB]", target);

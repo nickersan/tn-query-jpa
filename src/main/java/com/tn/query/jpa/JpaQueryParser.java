@@ -3,9 +3,10 @@ package com.tn.query.jpa;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.Predicate;
+
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.Expression;
+import jakarta.persistence.criteria.Predicate;
 
 import com.tn.query.AbstractQueryParser;
 import com.tn.query.Mapper;
@@ -28,14 +29,12 @@ public class JpaQueryParser extends AbstractQueryParser<Predicate>
   @Override
   protected Predicate equal(String left, Object right)
   {
-    //noinspection SuspiciousNameCombination
     return this.criteriaBuilder.equal(nameMapping(left), right);
   }
 
   @Override
   protected Predicate notEqual(String left, Object right)
   {
-    //noinspection SuspiciousNameCombination
     return this.criteriaBuilder.notEqual(nameMapping(left), right);
   }
 

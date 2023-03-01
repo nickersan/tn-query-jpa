@@ -3,9 +3,10 @@ package com.tn.query.jpa;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.Predicate;
+
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.Expression;
+import jakarta.persistence.criteria.Predicate;
 
 import com.tn.query.AbstractQueryParser;
 import com.tn.query.Mapper;
@@ -13,6 +14,8 @@ import com.tn.query.QueryParseException;
 
 public class JpaQueryParser extends AbstractQueryParser<Predicate>
 {
+  private static final String LIKE_WILDCARD = "%";
+
   private final CriteriaBuilder criteriaBuilder;
   private final Map<String, Expression<?>> nameMappings;
 
@@ -26,14 +29,12 @@ public class JpaQueryParser extends AbstractQueryParser<Predicate>
   @Override
   protected Predicate equal(String left, Object right)
   {
-    //noinspection SuspiciousNameCombination
     return this.criteriaBuilder.equal(nameMapping(left), right);
   }
 
   @Override
   protected Predicate notEqual(String left, Object right)
   {
-    //noinspection SuspiciousNameCombination
     return this.criteriaBuilder.notEqual(nameMapping(left), right);
   }
 
@@ -63,6 +64,18 @@ public class JpaQueryParser extends AbstractQueryParser<Predicate>
   {
     //noinspection unchecked
     return this.criteriaBuilder.lessThanOrEqualTo(nameMapping(left), comparable(right));
+  }
+
+  @Override
+  protected Predicate like(String left, Object right)
+  {
+    return this.criteriaBuilder.like(nameMapping(left), replaceWildcard(right));
+  }
+
+  @Override
+  protected Predicate notLike(String left, Object right)
+  {
+    return this.criteriaBuilder.notLike(nameMapping(left), replaceWildcard(right));
   }
 
   @Override
@@ -108,5 +121,12 @@ public class JpaQueryParser extends AbstractQueryParser<Predicate>
     if (!(obj instanceof Comparable)) throw new QueryParseException("Cannot compare: " + obj);
 
     return (Comparable)obj;
+  }
+
+  private String replaceWildcard(Object value)
+  {
+    checkLikeable(value);
+
+    return value.toString().replace(WILDCARD, LIKE_WILDCARD);
   }
 }

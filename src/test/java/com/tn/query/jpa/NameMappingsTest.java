@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Test;
 public class NameMappingsTest
 {
   @Test
-  void testForFields()
+  void shouldGetFieldsFromClass()
   {
     Root<Subject> root = mockRoot();
 
@@ -34,7 +34,7 @@ public class NameMappingsTest
   }
 
   @Test
-  void testForFieldsWithIgnored()
+  void shouldGetFieldsFromClassExcludingIgnored()
   {
     Root<Subject> root = mockRoot();
 

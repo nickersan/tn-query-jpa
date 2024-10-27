@@ -53,9 +53,11 @@ PersonRepositoryImpl personRepositoryImpl(EntityManager entityManager)
   return new PersonRepositoryImpl(
     entityManager,
     criteriaQuery,
-    new JpaQueryParser(
-      entityManager.getCriteriaBuilder(),
-      NameMappings.forFields(Person.class, criteriaQuery),
+    new DefaultQueryParser<>(
+      new JpaPredicateFactory(
+        entityManager.getCriteriaBuilder(),
+        NameMappings.forFields(Person.class, criteriaQuery)
+      ),
       ValueMappers.forFields(Person.class)
     )
   );
@@ -66,3 +68,10 @@ Spring will do all the necessary wiring; the resulting `personRepository` could 
 ```java
 List<Person> people = personRepository.findWhere("((firstName = John && sex = MALE) || (firstName = Jane && sex = FEMALE)) && lastName = Smith");
 ```
+
+## Build
+
+Typically, the command `mvn clean install` is used, which builds and packages, runs unit and integration tests and installs the artifacts into the local
+[Maven](https://maven.apache.org/) repository.
+
+See [tn-parent](..\tn-parent\README.md) for more details regarding the build.

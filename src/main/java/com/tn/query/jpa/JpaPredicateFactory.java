@@ -1,6 +1,5 @@
 package com.tn.query.jpa;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -8,78 +7,78 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Predicate;
 
-import com.tn.query.AbstractQueryParser;
-import com.tn.query.Mapper;
+import com.tn.query.PredicateFactory;
+import com.tn.query.QueryException;
 import com.tn.query.QueryParseException;
 
-public class JpaQueryParser extends AbstractQueryParser<Predicate>
+public class JpaPredicateFactory implements PredicateFactory<Predicate>
 {
   private static final String LIKE_WILDCARD = "%";
+  private static final String WILDCARD = "*";
 
   private final CriteriaBuilder criteriaBuilder;
   private final Map<String, Expression<?>> nameMappings;
 
-  public JpaQueryParser(CriteriaBuilder criteriaBuilder, Map<String, Expression<?>> nameMappings, Collection<Mapper> valueMappers)
+  public JpaPredicateFactory(CriteriaBuilder criteriaBuilder, Map<String, Expression<?>> nameMappings)
   {
-    super(valueMappers);
     this.criteriaBuilder = criteriaBuilder;
     this.nameMappings = nameMappings;
   }
 
   @Override
-  protected Predicate equal(String left, Object right)
+  public Predicate equal(String left, Object right)
   {
-    return this.criteriaBuilder.equal(nameMapping(left), right);
+    return right != null ? this.criteriaBuilder.equal(nameMapping(left), right) : this.criteriaBuilder.isNull(nameMapping(left));
   }
 
   @Override
-  protected Predicate notEqual(String left, Object right)
+  public Predicate notEqual(String left, Object right)
   {
-    return this.criteriaBuilder.notEqual(nameMapping(left), right);
+    return right != null ? this.criteriaBuilder.notEqual(nameMapping(left), right) : this.criteriaBuilder.isNotNull(nameMapping(left));
   }
 
   @Override
-  protected Predicate greaterThan(String left, Object right)
+  public Predicate greaterThan(String left, Object right)
   {
     //noinspection unchecked
     return this.criteriaBuilder.greaterThan(nameMapping(left), comparable(right));
   }
 
   @Override
-  protected Predicate greaterThanOrEqual(String left, Object right)
+  public Predicate greaterThanOrEqual(String left, Object right)
   {
     //noinspection unchecked
     return this.criteriaBuilder.greaterThanOrEqualTo(nameMapping(left), comparable(right));
   }
 
   @Override
-  protected Predicate lessThan(String left, Object right)
+  public Predicate lessThan(String left, Object right)
   {
     //noinspection unchecked
     return this.criteriaBuilder.lessThan(nameMapping(left), comparable(right));
   }
 
   @Override
-  protected Predicate lessThanOrEqual(String left, Object right)
+  public Predicate lessThanOrEqual(String left, Object right)
   {
     //noinspection unchecked
     return this.criteriaBuilder.lessThanOrEqualTo(nameMapping(left), comparable(right));
   }
 
   @Override
-  protected Predicate like(String left, Object right)
+  public Predicate like(String left, Object right)
   {
     return this.criteriaBuilder.like(nameMapping(left), replaceWildcard(right));
   }
 
   @Override
-  protected Predicate notLike(String left, Object right)
+  public Predicate notLike(String left, Object right)
   {
     return this.criteriaBuilder.notLike(nameMapping(left), replaceWildcard(right));
   }
 
   @Override
-  protected Predicate in(String left, List<?> right)
+  public Predicate in(String left, List<?> right)
   {
     CriteriaBuilder.In<Object> in = this.criteriaBuilder.in(nameMapping(left));
     right.forEach(in::value);
@@ -88,19 +87,19 @@ public class JpaQueryParser extends AbstractQueryParser<Predicate>
   }
 
   @Override
-  protected Predicate and(Predicate left, Predicate right)
+  public Predicate and(Predicate left, Predicate right)
   {
     return this.criteriaBuilder.and(new Predicate[]{left, right});
   }
 
   @Override
-  protected Predicate or(Predicate left, Predicate right)
+  public Predicate or(Predicate left, Predicate right)
   {
     return this.criteriaBuilder.or(new Predicate[]{left, right});
   }
 
   @Override
-  protected Predicate parenthesis(Predicate node)
+  public Predicate parenthesis(Predicate node)
   {
     //Parenthesis is handled implicitly when parsing queries.
     return node;
@@ -125,7 +124,7 @@ public class JpaQueryParser extends AbstractQueryParser<Predicate>
 
   private String replaceWildcard(Object value)
   {
-    checkLikeable(value);
+    if (!(value instanceof String)) throw new QueryException("Like comparisons only work for string values, received: " + value);
 
     return value.toString().replace(WILDCARD, LIKE_WILDCARD);
   }

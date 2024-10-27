@@ -21,15 +21,16 @@ public class Target
   @GeneratedValue
   private Long id;
 
-  boolean booleanValue;
-  byte byteValue;
-  char charValue;
+  Boolean booleanValue;
+  Byte byteValue;
+  Character charValue;
   Date dateValue;
-  double doubleValue;
-  int intValue;
+  Double doubleValue;
+  Float floatValue;
+  Integer intValue;
   LocalDate localDateValue;
   LocalDateTime localDateTimeValue;
-  long longValue;
-  short shortValue;
+  Long longValue;
+  Short shortValue;
   String stringValue;
 }

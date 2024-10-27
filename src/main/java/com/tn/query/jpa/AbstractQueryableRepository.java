@@ -1,7 +1,5 @@
 package com.tn.query.jpa;
 
-import java.util.List;
-
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
@@ -22,7 +20,7 @@ public abstract class AbstractQueryableRepository<T> implements QueryableReposit
   }
 
   @Override
-  public List<T> findWhere(String predicate)
+  public Iterable<T> findWhere(String predicate)
   {
     return this.entityManager.createQuery(this.criteriaQuery.where(this.queryParser.parse(predicate))).getResultList();
   }

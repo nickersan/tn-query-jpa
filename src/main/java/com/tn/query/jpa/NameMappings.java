@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Root;
 
@@ -21,14 +20,14 @@ public class NameMappings
   {
   }
 
-  public static <T> Map<String, Expression<?>> forFields(Class<T> subject, CriteriaQuery<T> criteriaQuery)
+  public static <T> Map<String, Expression<?>> forFields(Root<T> root)
   {
-    return forFields(subject, criteriaQuery, emptyList());
+    return forFields(root, emptyList());
   }
 
-  public static <T> Map<String, Expression<?>> forFields(Class<T> subject, CriteriaQuery<T> criteriaQuery, Collection<String> ignored)
+  public static <T> Map<String, Expression<?>> forFields(Root<T> root, Collection<String> ignored)
   {
-    return fieldNames(subject, ignored).stream().collect(toMap(identity(), expression(criteriaQuery.from(subject))));
+    return fieldNames(root.getJavaType(), ignored).stream().collect(toMap(identity(), expression(root)));
   }
 
   private static <T> Function<String, Expression<?>> expression(Root<T> root)

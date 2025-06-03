@@ -24,7 +24,7 @@ import com.tn.query.DefaultQueryParser;
 import com.tn.query.QueryParser;
 import com.tn.query.ValueMappers;
 
-public abstract class AbstractQueryableRepository<T> implements QueryableRepository<T>
+public  class AbstractQueryableRepository<T> implements QueryableRepository<T>
 {
   private final EntityManager entityManager;
   private final Class<T> entityType;
@@ -47,11 +47,17 @@ public abstract class AbstractQueryableRepository<T> implements QueryableReposit
   }
 
   @Override
+  public Iterable<T> findWhere(String query, Sort sort)
+  {
+    return this.entityManager.createQuery(entityCriteriaQuery(query, sort)).getResultList();
+  }
+
+  @Override
   public Page<T> findWhere(String query, PageRequest pageRequest)
   {
     return asPage(
       pageRequest,
-      this.entityManager.createQuery(entityCriteriaQuery(query, pageRequest))
+      this.entityManager.createQuery(entityCriteriaQuery(query, pageRequest.getSort()))
         .setFirstResult(pageRequest.getPageNumber() * pageRequest.getPageSize())
         .setMaxResults(pageRequest.getPageSize())
         .getResultList(),
@@ -60,14 +66,14 @@ public abstract class AbstractQueryableRepository<T> implements QueryableReposit
     );
   }
 
-  private CriteriaQuery<T> entityCriteriaQuery(String query, PageRequest pageRequest)
+  private CriteriaQuery<T> entityCriteriaQuery(String query, Sort sort)
   {
     CriteriaBuilder criteriaBuilder = this.entityManager.getCriteriaBuilder();
     CriteriaQuery<T> entityCriteriaQuery = criteriaBuilder.createQuery(this.entityType);
     Root<T> root = entityCriteriaQuery.from(this.entityType);
     entityCriteriaQuery.where(queryParser(criteriaBuilder, root).parse(query));
 
-    if (pageRequest != null) entityCriteriaQuery.orderBy(asOrder(pageRequest.getSort(), criteriaBuilder, root));
+    if (sort != null) entityCriteriaQuery.orderBy(asOrder(sort, criteriaBuilder, root));
 
     return entityCriteriaQuery;
   }

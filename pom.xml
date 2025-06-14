@@ -21,6 +21,10 @@
 
   <packaging>jar</packaging>
 
+  <properties>
+    <spring-data.version>3.2.4</spring-data.version>
+  </properties>
+
   <dependencies>
 
     <!-- tn -->
@@ -63,7 +67,7 @@
     <dependency>
       <groupId>org.springframework.data</groupId>
       <artifactId>spring-data-commons</artifactId>
-      <version>${spring.version}</version>
+      <version>${spring-data.version}</version>
     </dependency>
 
     <dependency>

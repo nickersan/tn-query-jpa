@@ -12,8 +12,6 @@ import java.util.Calendar;
 import java.util.List;
 
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,17 +20,19 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.tn.query.QueryException;
 import com.tn.query.QueryParseException;
-import com.tn.query.ValueMappers;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
-@ContextConfiguration(classes = JpaQueryParserIntegrationTest.TestConfiguration.class)
-class JpaQueryParserIntegrationTest
+@ContextConfiguration(classes = JpaPredicateFactoryIntegrationTest.TestConfiguration.class)
+class JpaPredicateFactoryIntegrationTest
 {
   @Autowired
   TargetRepository targetRepository;
@@ -45,7 +45,7 @@ class JpaQueryParserIntegrationTest
 
   @Test
   @Transactional
-  void testParseBoolean()
+  void shouldMatchBoolean()
   {
     Target target = new Target();
     target.booleanValue = true;
@@ -87,7 +87,7 @@ class JpaQueryParserIntegrationTest
   }
 
   @Test
-  void testParseByte()
+  void shouldMatchByte()
   {
     Target target = new Target();
     target.byteValue = 1;
@@ -131,7 +131,7 @@ class JpaQueryParserIntegrationTest
   }
 
   @Test
-  void testParseChar()
+  void shouldMatchChar()
   {
     Target target = new Target();
     target.charValue = 'b';
@@ -175,7 +175,7 @@ class JpaQueryParserIntegrationTest
   }
 
   @Test
-  void testParseDate()
+  void shouldMatchDate()
   {
     Calendar calendar = Calendar.getInstance();
     calendar.set(2021, Calendar.FEBRUARY, 5, 0, 0, 0);
@@ -223,7 +223,7 @@ class JpaQueryParserIntegrationTest
   }
 
   @Test
-  void testParseDateTimeWithMinutes()
+  void shouldMatchDateTimeWithMinutes()
   {
     Calendar calendar = Calendar.getInstance();
     calendar.set(2021, Calendar.FEBRUARY, 5, 10, 15, 0);
@@ -271,7 +271,7 @@ class JpaQueryParserIntegrationTest
   }
 
   @Test
-  void testParseDateTimeWithSeconds()
+  void shouldMatchDateTimeWithSeconds()
   {
     Calendar calendar = Calendar.getInstance();
     calendar.set(2021, Calendar.FEBRUARY, 5, 10, 15, 16);
@@ -319,7 +319,7 @@ class JpaQueryParserIntegrationTest
   }
 
   @Test
-  void testParseDateTimeWithMilliseconds()
+  void shouldMatchDateTimeWithMilliseconds()
   {
     Calendar calendar = Calendar.getInstance();
     calendar.set(2021, Calendar.FEBRUARY, 5, 10, 15, 16);
@@ -367,7 +367,7 @@ class JpaQueryParserIntegrationTest
   }
 
   @Test
-  void testParseDouble()
+  void shouldMatchDouble()
   {
     Target target = new Target();
     target.doubleValue = 1.2;
@@ -411,7 +411,51 @@ class JpaQueryParserIntegrationTest
   }
 
   @Test
-  void testParseInt()
+  void shouldMatchFloat()
+  {
+    Target target = new Target();
+    target.floatValue = 1.2F;
+
+    this.targetRepository.save(target);
+
+    assertFindWhere("floatValue = 1.2", target);
+    assertFindWhere("floatValue = 1.3");
+    assertThrows(QueryException.class, () -> this.targetRepository.findWhere("floatValue = X"));
+
+    assertFindWhere("floatValue != 1.2");
+    assertFindWhere("floatValue != 1.3", target);
+    assertThrows(QueryException.class, () -> this.targetRepository.findWhere("floatValue != X"));
+
+    assertFindWhere("floatValue > 1.1", target);
+    assertFindWhere("floatValue > 1.2");
+    assertThrows(QueryException.class, () -> this.targetRepository.findWhere("floatValue > X"));
+
+    assertFindWhere("floatValue >= 1.1", target);
+    assertFindWhere("floatValue >= 1.2", target);
+    assertFindWhere("floatValue >= 1.3");
+    assertThrows(QueryException.class, () -> this.targetRepository.findWhere("floatValue >= X"));
+
+    assertFindWhere("floatValue < 1.3", target);
+    assertFindWhere("floatValue < 1.2");
+    assertThrows(QueryException.class, () -> this.targetRepository.findWhere("floatValue < X"));
+
+    assertFindWhere("floatValue <= 1.3", target);
+    assertFindWhere("floatValue <= 1.2", target);
+    assertFindWhere("floatValue <= 1.1");
+    assertThrows(QueryException.class, () -> this.targetRepository.findWhere("floatValue <= X"));
+
+    assertThrows(QueryException.class, () -> this.targetRepository.findWhere("floatValue ≈ 1.3"));
+
+    assertThrows(QueryException.class, () -> this.targetRepository.findWhere("floatValue !≈ 1.2"));
+
+    assertFindWhere("floatValue ∈ [1.1, 1.2, 1.3]", target);
+    assertFindWhere("floatValue ∈ [1.2]", target);
+    assertFindWhere("floatValue ∈ [1.1]");
+    assertThrows(QueryException.class, () -> this.targetRepository.findWhere("floatValue ∈ X"));
+  }
+
+  @Test
+  void shouldMatchInt()
   {
     Target target = new Target();
     target.intValue = 10;
@@ -455,7 +499,7 @@ class JpaQueryParserIntegrationTest
   }
 
   @Test
-  void testParseLocalDate()
+  void shouldMatchLocalDate()
   {
     LocalDate localDate = LocalDate.of(2021, Month.FEBRUARY, 5);
 
@@ -501,7 +545,7 @@ class JpaQueryParserIntegrationTest
   }
 
   @Test
-  void testParseLocalDateTimeWithMinutes()
+  void shouldMatchLocalDateTimeWithMinutes()
   {
     LocalDateTime localDateTime = LocalDateTime.of(2021, Month.FEBRUARY, 5, 10, 15);
 
@@ -547,7 +591,7 @@ class JpaQueryParserIntegrationTest
   }
 
   @Test
-  void testParseLocalDateTimeWithSeconds()
+  void shouldMatchLocalDateTimeWithSeconds()
   {
     LocalDateTime localDateTime = LocalDateTime.of(2021, Month.FEBRUARY, 5, 10, 15, 16);
 
@@ -593,7 +637,7 @@ class JpaQueryParserIntegrationTest
   }
 
   @Test
-  void testParseLocalDateTimeWithMilliseconds()
+  void shouldMatchLocalDateTimeWithMilliseconds()
   {
     LocalDateTime localDateTime = LocalDateTime.of(2021, Month.FEBRUARY, 5, 10, 15, 16, 170_000_000);
 
@@ -639,10 +683,10 @@ class JpaQueryParserIntegrationTest
   }
 
   @Test
-  void testParseLong()
+  void shouldMatchLong()
   {
     Target target = new Target();
-    target.longValue = 10;
+    target.longValue = 10L;
 
     this.targetRepository.save(target);
 
@@ -683,7 +727,7 @@ class JpaQueryParserIntegrationTest
   }
 
   @Test
-  void testParseShort()
+  void shouldMatchShort()
   {
     Target target = new Target();
     target.shortValue = 10;
@@ -727,7 +771,7 @@ class JpaQueryParserIntegrationTest
   }
 
   @Test
-  void testParseString()
+  void shouldMatchString()
   {
     Target target = new Target();
     target.stringValue = "BB";
@@ -774,13 +818,34 @@ class JpaQueryParserIntegrationTest
   }
 
   @Test
-  void testParseUnknownField()
+  void shouldMatchNull()
+  {
+    Target target = new Target();
+
+    this.targetRepository.save(target);
+
+    assertFindWhere("booleanValue = null", target);
+    assertFindWhere("byteValue = null", target);
+    assertFindWhere("charValue = null", target);
+    assertFindWhere("dateValue = null", target);
+    assertFindWhere("doubleValue = null", target);
+    assertFindWhere("floatValue = null", target);
+    assertFindWhere("intValue = null", target);
+    assertFindWhere("localDateValue = null", target);
+    assertFindWhere("localDateTimeValue = null", target);
+    assertFindWhere("longValue = null", target);
+    assertFindWhere("shortValue = null", target);
+    assertFindWhere("stringValue = null", target);
+  }
+
+  @Test
+  void shouldNotMatchUnknownField()
   {
     assertThrows(QueryParseException.class, () -> this.targetRepository.findWhere("unknown = anything"));
   }
 
   @Test
-  void testParseAnd()
+  void shouldMatchWithAnd()
   {
     Target target = new Target();
     target.stringValue = "Testing";
@@ -794,7 +859,7 @@ class JpaQueryParserIntegrationTest
   }
 
   @Test
-  void testParseOr()
+  void shouldMatchWithOr()
   {
     Target target = new Target();
     target.stringValue = "Testing";
@@ -809,7 +874,7 @@ class JpaQueryParserIntegrationTest
   }
 
   @Test
-  void testParseMultipleLogicalOperatorsWithParenthesis()
+  void shouldMatchMultipleLogicalOperatorsWithParenthesis()
   {
     Target target = new Target();
     target.booleanValue = true;
@@ -821,6 +886,62 @@ class JpaQueryParserIntegrationTest
     assertFindWhere("booleanValue = true || (stringValue = X && intValue = 1)", target);
     assertFindWhere("booleanValue = false || (stringValue = Testing && intValue = 123)", target);
     assertFindWhere("booleanValue = false || (stringValue = X && intValue = 1)");
+  }
+
+  @Test
+  void shouldPaginateResults()
+  {
+    Target target1 = new Target();
+    target1.stringValue = "AA";
+
+    Target target2 = new Target();
+    target2.stringValue = "BB";
+
+    Target target3 = new Target();
+    target3.stringValue = "AA";
+
+    Target target4 = new Target();
+    target4.stringValue = "AA";
+
+    this.targetRepository.saveAll(List.of(target1, target2, target3, target4));
+
+    assertPage(List.of(target1, target3), 0, 2, 3, this.targetRepository.findWhere("stringValue = AA", PageRequest.of(0, 2)));
+    assertPage(List.of(target4), 1, 2, 3, this.targetRepository.findWhere("stringValue = AA", PageRequest.of(1, 2)));
+
+    // Invoking Spring implementation to ensure use of Page is correct.
+    assertPage(List.of(target1, target2, target3), 0, 3, 4, this.targetRepository.findAll(PageRequest.of(0, 3)));
+    assertPage(List.of(target4), 1, 3, 4, this.targetRepository.findAll(PageRequest.of(1, 3)));
+  }
+
+  @Test
+  void shouldPaginateResultsAndSort()
+  {
+    Target target1 = new Target();
+    target1.stringValue = "AA";
+
+    Target target2 = new Target();
+    target2.stringValue = "BB";
+
+    Target target3 = new Target();
+    target3.stringValue = "AA";
+
+    Target target4 = new Target();
+    target4.stringValue = "AA";
+
+    this.targetRepository.saveAll(List.of(target1, target2, target3, target4));
+
+    Sort sort = Sort.by(Sort.Direction.DESC, "id");
+
+    assertPage(List.of(target4, target3), 0, 2, 3, this.targetRepository.findWhere("stringValue = AA", PageRequest.of(0, 2, sort)));
+    assertPage(List.of(target1), 1, 2, 3, this.targetRepository.findWhere("stringValue = AA", PageRequest.of(1, 2, sort)));
+  }
+
+  private void assertPage(List<Target> elements, int pageNumber, int pageSize, int total, Page<Target> page)
+  {
+    assertEquals(elements,  page.getContent());
+    assertEquals(pageNumber, page.getNumber());
+    assertEquals(pageSize, page.getSize());
+    assertEquals(total, page.getTotalElements());
   }
 
   private void assertFindWhere(String query, Target... expected)
@@ -838,21 +959,11 @@ class JpaQueryParserIntegrationTest
   @EnableJpaRepositories("com.tn.query.jpa")
   static class TestConfiguration
   {
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Bean
     TargetRepositoryImpl targetRepositoryImpl(EntityManager entityManager)
     {
-      CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-      CriteriaQuery<Target> criteriaQuery = criteriaBuilder.createQuery(Target.class);
-
-      return new TargetRepositoryImpl(
-        entityManager,
-        criteriaQuery,
-        new JpaQueryParser(
-          entityManager.getCriteriaBuilder(),
-          NameMappings.forFields(Target.class, criteriaQuery),
-          ValueMappers.forFields(Target.class)
-        )
-      );
+      return new TargetRepositoryImpl(entityManager);
     }
   }
 }

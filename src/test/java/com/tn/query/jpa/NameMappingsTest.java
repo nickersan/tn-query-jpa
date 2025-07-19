@@ -11,21 +11,20 @@ import java.util.Map;
 import java.util.Set;
 
 import jakarta.persistence.Column;
-import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Root;
 
 import org.junit.jupiter.api.Test;
 
-public class NameMappingsTest
+class NameMappingsTest
 {
   @Test
-  void testForFields()
+  void shouldGetFieldsFromClass()
   {
     Root<Subject> root = mockRoot();
 
-    Map<String, Expression<?>> nameMappings = NameMappings.forFields(Subject.class, mockCriteriaQuery(root));
+    Map<String, Expression<?>> nameMappings = NameMappings.forFields(root);
 
     assertEquals(Set.of("oneValue", "twoValue"), nameMappings.keySet());
 
@@ -34,24 +33,15 @@ public class NameMappingsTest
   }
 
   @Test
-  void testForFieldsWithIgnored()
+  void shouldGetFieldsFromClassExcludingIgnored()
   {
     Root<Subject> root = mockRoot();
 
-    Map<String, Expression<?>> nameMappings = NameMappings.forFields(Subject.class, mockCriteriaQuery(root), List.of("twoValue"));
+    Map<String, Expression<?>> nameMappings = NameMappings.forFields(root, List.of("twoValue"));
 
     assertEquals(Set.of("oneValue"), nameMappings.keySet());
 
     verify(root).get("oneValue");
-  }
-
-  private static CriteriaQuery<Subject> mockCriteriaQuery(Root<Subject> root)
-  {
-    @SuppressWarnings("unchecked")
-    CriteriaQuery<Subject> criteriaQuery = mock(CriteriaQuery.class);
-    when(criteriaQuery.from(Subject.class)).thenReturn(root);
-
-    return criteriaQuery;
   }
 
   @SuppressWarnings("unchecked")
@@ -59,6 +49,7 @@ public class NameMappingsTest
   {
     Root<Subject> root = mock(Root.class);
     when(root.get(anyString())).thenReturn(mock(Path.class));
+    when(root.getJavaType()).thenAnswer(invocation -> Subject.class);
 
     return root;
   }

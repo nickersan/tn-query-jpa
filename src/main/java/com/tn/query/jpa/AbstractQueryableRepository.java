@@ -3,7 +3,6 @@ package com.tn.query.jpa;
 import static java.util.Collections.emptyList;
 
 import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
@@ -24,7 +23,7 @@ import com.tn.query.DefaultQueryParser;
 import com.tn.query.QueryParser;
 import com.tn.query.ValueMappers;
 
-public  class AbstractQueryableRepository<T> implements QueryableRepository<T>
+public abstract class AbstractQueryableRepository<T> implements QueryableRepository<T>
 {
   private final EntityManager entityManager;
   private final Class<T> entityType;
@@ -64,6 +63,11 @@ public  class AbstractQueryableRepository<T> implements QueryableRepository<T>
       this.entityManager.createQuery(countCriteriaQuery(query))
         .getSingleResult()
     );
+  }
+
+  protected EntityManager entityManager()
+  {
+    return this.entityManager;
   }
 
   private CriteriaQuery<T> entityCriteriaQuery(String query, Sort sort)
@@ -115,17 +119,7 @@ public  class AbstractQueryableRepository<T> implements QueryableRepository<T>
   private Class<T> entryType()
   {
     //noinspection unchecked
-    return (Class<T>)parameterizedType(getClass()).getActualTypeArguments()[0];
-  }
-
-  private ParameterizedType parameterizedType(Class<?> clazz)
-  {
-    if (clazz.equals(Object.class)) throw new IllegalStateException("Failed to find entity type for: " + getClass());
-
-    Type genericSuperclass = clazz.getGenericSuperclass();
-    return ((ParameterizedType)genericSuperclass).getRawType().equals(AbstractQueryableRepository.class)
-      ? (ParameterizedType)genericSuperclass
-      : parameterizedType(clazz.getSuperclass());
+    return (Class<T>)((ParameterizedType)this.getClass().getGenericSuperclass()).getActualTypeArguments()[0];
   }
 
   private QueryParser<Predicate> queryParser(CriteriaBuilder criteriaBuilder, Root<T> root)

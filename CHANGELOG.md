@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1](https://github.com/nickersan/tn-query-jpa/compare/v1.0.0...v1.0.1) (2025-10-04)
+
+
+### Bug Fixes
+
+* Making base repository class abstract. ([#5](https://github.com/nickersan/tn-query-jpa/issues/5)) ([ecca624](https://github.com/nickersan/tn-query-jpa/commit/ecca624b414c2eb9e6351a206d5d6a92c7b431c3))
+
 ## 1.0.0 (2025-07-19)
 
 
